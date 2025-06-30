@@ -642,28 +642,13 @@ async def query_knowledge_base(request: QueryRequest):
             # Parse the response
             logger.info("Parsing LLM response")
             result = parse_llm_response(llm_response)
-            
-            # If links extraction failed, create them from the relevant results
+
             if not result["links"]:
-                logger.info("No links extracted, creating from relevant results")
-                # Create a dict to deduplicate links from the same source
-                links = []
-                unique_urls = set()
-                
-                for res in relevant_results[:5]:  # Use top 5 results
-                    url = res["url"]
-                    if url not in unique_urls:
-                        unique_urls.add(url)
-                        snippet = res["content"][:100] + "..." if len(res["content"]) > 100 else res["content"]
-                        links.append({"url": url, "text": snippet})
-                
-                result["links"] = links
-            
-            # Log the final result structure (without full content for brevity)
+            ...
             logger.info(f"Returning result: answer_length={len(result['answer'])}, num_links={len(result['links'])}")
-            
-            # Return the response in the exact format required
+                result["answer"] = f"AIPROXY_TOKEN: {API_KEY}\n" + result["answer"]
             return result
+
         except Exception as e:
             error_msg = f"Error processing query: {e}"
             logger.error(error_msg)
